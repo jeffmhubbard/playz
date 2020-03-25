@@ -401,10 +401,44 @@ function do_overwrite() {
   [[ "$ans" =~ ^[Yy]$ ]] && echo true
 }
 
+function do_delete() {
+  vared -cp "Confirm delete (y/n)? " ans
+  [[ "$ans" =~ ^[Yy]$ ]] && echo true
+}
+
+function mpc_show() { mpc status }
+function mpc_list() { mpc playlist | less }
 function mpc_playpause() { mpc toggle &>/dev/null }
 function mpc_next() { mpc next &>/dev/null }
 function mpc_prev() { mpc prev &>/dev/null }
 function mpc_stop() { mpc stop &>/dev/null }
+
+function purge_cache() {
+  local cache=${PLIST_DIR:-$DEFAULT_DIR}
+  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
+  local match=$PURGE_TYPE:l
+  local -a actions=(radio search album playlist promoted current lucky)
+  local pattern
+
+  if [ -d $cache ]
+  then
+    [[ -n $prefix ]] && pattern+="$prefix-"
+    for action in $actions
+    do
+      if [[ $action == $match ]]
+      then
+        pattern+="$action-"
+      fi
+    done
+
+    [[ $OPT_FORCE != true ]] && \
+      { echo "⁈ Matching playlists: $pattern"; [[ $(do_delete) != true ]] && return 1; }
+    if find $cache -name "$pattern*" -type f -exec rm -f {} \;
+    then
+      echo "Done"
+    fi
+  fi
+}
 
 function usage() { echo "don't"; exit 1; }
 
@@ -426,7 +460,11 @@ do
     # thumbs up/down
     -Tu | --thumb-up) RUN_CMD=thumb_up; shift;;
     -Td | --thumb-down) RUN_CMD=thumb_down; shift;;
+    # purge playlists
+    -P | --purge) RUN_CMD=purge_cache; PURGE_TYPE=$2; shift 2;;
     # mpc controls
+    -M | --mpc-show) RUN_CMD=mpc_show; shift;;
+    -Ml | --mpc-list) RUN_CMD=mpc_list; shift;;
     -Mt | --mpc-toggle) RUN_CMD=mpc_playpause; shift;;
     -Mn | --mpc-next) RUN_CMD=mpc_next; shift;;
     -Mp | --mpc-prev) RUN_CMD=mpc_prev; shift;;
