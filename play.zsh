@@ -2,6 +2,9 @@
 
 # playz - fetch playlists from gmusicproxy
 
+APPNAME=playz
+APPVER=0.0.1
+
 DEFAULT_CONF=$HOME/.config/playz/config
 DEFAULT_HOST=0.0.0.0
 DEFAULT_PORT=6600
@@ -460,7 +463,54 @@ function purge_cache() {
 }
 
 # no help message
-function usage() { echo "don't"; exit 1; }
+function usage() {
+  echo "$APPNAME ($APPVER)"
+  echo " fetch playlists from gmusicproxy"
+  echo
+  echo "Usage:"
+  echo " $APPNAME -S 'the worst band - terrible song about nothing' --tracks 10 --auto"
+  echo
+  echo "Search:"
+  echo " -S,  --search          return results from search"
+  echo " -Sr, --search-radio    return new station from search "
+  echo " -St, --search-top      return artist's top tracks"
+  echo " -Sd, --search-discog   return artist's discography"
+  echo " -Sc, --search-current  return new station from current song"
+  echo
+  echo "Fetch:"
+  echo " -F,  --fetch           fetch collection playlist"
+  echo " -Fl, --fetch-lucky     fetch IFL playlist"
+  echo " -Ft, --fetch-thumbs    fetch promoted playlist"
+  echo " -Fd, --fetch-stations  fetch all station playlists"
+  echo " -Fc, --fetch-playlists fetch all user playlists"
+  echo
+  echo "Rating:"
+  echo " -Tu, --thumb-up        like song"
+  echo " -Td, --thumb-down      dislike song"
+  echo
+  echo "Purge:"
+  echo " -P,  --purge           purge playlists"
+  echo
+  echo "Mpc:"
+  echo " -M,  --mpc-show        show mpc status"
+  echo " -Ml, --mpc-list        show current playlist"
+  echo " -Mt, --mpc-toggle      toggle play - pause"
+  echo " -Mn, --mpc-next        next track"
+  echo " -Mp, --mpc-prev        previous track"
+  echo " -Ms, --mpc-stop        stop playback"
+  echo
+  echo "Global:"
+  echo " -t,  --tracks          number of tracks to return"
+  echo " -e,  --exact           return exact match"
+  echo " -a,  --album           return album match"
+  echo " -f,  --force           do not prompt for confirmation"
+  echo " -c,  --clear           clear mpd playlist"
+  echo " -l,  --load            load playlist"
+  echo " -s,  --start           start playlist"
+  echo " -A,  --auto            verbose output"
+  echo " -h,  --help            show this help message and exit"
+  echo
+}
 
 ##################################################
 
