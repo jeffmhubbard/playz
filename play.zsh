@@ -480,7 +480,7 @@ function usage() {
   echo " -Fl, --fetch-lucky     fetch IFL playlist"
   echo " -Ft, --fetch-thumbs    fetch promoted playlist"
   echo " -Fd, --fetch-stations  fetch all station playlists"
-  echo " -Fc, --fetch-playlists fetch all user playlists"
+  echo " -Fp, --fetch-playlists fetch all user playlists"
   echo
   echo "Rating:"
   echo " -Tu, --thumb-up        like song"
@@ -531,7 +531,7 @@ do
     -Tu | --thumb-up) RUN_CMD=thumb_up; shift;;
     -Td | --thumb-down) RUN_CMD=thumb_down; shift;;
     # purge playlists
-    -P | --purge) RUN_CMD=purge_cache; PURGE_TYPE=$2; shift 2;;
+    -P | --purge) RUN_CMD=purge_cache; PURGE_TYPE=$2; shift 1;;
     # mpc controls
     -M | --mpc-show) RUN_CMD=mpc_show; shift;;
     -Ml | --mpc-list) RUN_CMD=mpc_list; shift;;

@@ -18,7 +18,7 @@ Fetch:
  -Fl, --fetch-lucky     fetch IFL playlist
  -Ft, --fetch-thumbs    fetch promoted playlist
  -Fd, --fetch-stations  fetch all station playlists
- -Fc, --fetch-playlists fetch all user playlists
+ -Fp, --fetch-playlists fetch all user playlists
 
 Rating:
  -Tu, --thumb-up        like song
