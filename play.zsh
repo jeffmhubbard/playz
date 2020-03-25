@@ -438,8 +438,8 @@ function mpc_stop() { mpc stop &>/dev/null }
 function purge_cache() {
   local cache=${PLIST_DIR:-$DEFAULT_DIR}
   local prefix=${PLIST_PFX:-$DEFAULT_PFX}
-  local match=$PURGE_TYPE:l
-  local -a actions=(radio search album playlist promoted current lucky)
+  local match=${PURGE_TYPE:l}
+  local -a actions=(search radio album playlist promoted current lucky)
   local pattern
 
   if [ -d $cache ]
@@ -447,10 +447,8 @@ function purge_cache() {
     [[ -n $prefix ]] && pattern+="$prefix-"
     for action in $actions
     do
-      if [[ $action == $match ]]
-      then
-        pattern+="$action-"
-      fi
+      [[ $action == $match ]] && pattern+="$action"
+      continue
     done
 
     [[ $OPT_FORCE != true ]] && \
@@ -462,7 +460,7 @@ function purge_cache() {
   fi
 }
 
-# no help message
+# help message
 function usage() {
   echo "$APPNAME ($APPVER)"
   echo " fetch playlists from gmusicproxy"

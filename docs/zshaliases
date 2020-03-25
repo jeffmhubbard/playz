@@ -1,0 +1,35 @@
+# playz aliases
+# pzp requires fzf
+if (( $+commands[playz] && $+commands[mpc] ))
+then
+    alias pz="playz "
+    alias pzs="_playz_search "
+    alias pzr="_playz_radio "
+    alias pzt="_playz_toptracks "
+    alias pzd="_playz_discog "
+    alias pzcur="playz -Sc -A"
+    alias pzc="playz -F -A"
+    alias pzl="playz -Fl -t 100 -A"
+    alias pz!="playz -Ft -A"
+    alias pzp="_playz_picker"
+    alias pz+="playz -Tu"
+    alias pz-="playz -Td"
+
+    function _playz_search() { [ -n $@ ] && playz -S "$1" -A }
+    function _playz_radio() { [ -n $@ ] && playz -Sr "$1" -A }
+    function _playz_toptracks() { [ -n $@ ] && playz -St "$1" -A }
+    function _playz_discog() { [ -n $@ ] && playz -Sd "$1" -A }
+    function _playz_picker() {
+        local pldir=$HOME/.config/mpd/playlists
+        local plist=$(mpc lsplaylists | \
+            fzf +m --layout=reverse-list \
+                --preview "less ${MPD_PLAYLISTS:-$pldir}/{}.m3u")
+        if [[ -n $plist ]]
+        then
+            mpc clear &>/dev/null
+            mpc load $plist &>/dev/null
+            mpc play
+        fi
+    }
+fi
+
