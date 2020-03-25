@@ -46,3 +46,21 @@ Global:
  -A,  --auto            verbose output
  -h,  --help            show this help message and exit
 ```
+
+### Requirements
+- Properly configured `mpc`
+- Properly confugured `GMusicProxy`
+- `zsh`
+- `curl`
+
+### Installation
+
+Manual:
+```sh
+install -Dm 755 play.zsh /usr/local/bin/playz
+```
+
+Aliases:
+```sh
+cat doc/zshaliases >> ~/.zshrc
+```

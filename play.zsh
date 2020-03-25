@@ -6,8 +6,6 @@ APPNAME=playz
 APPVER=0.0.1
 
 DEFAULT_CONF=$HOME/.config/playz/config
-DEFAULT_HOST=0.0.0.0
-DEFAULT_PORT=6600
 DEFAULT_URL=http://localhost:9999
 DEFAULT_DIR=$HOME/.config/mpd/playlists
 DEFAULT_PFX=playz

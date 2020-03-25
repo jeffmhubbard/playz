@@ -1,10 +1,13 @@
 # playz conf
 
-MPD_HOST=127.0.0.1
-MPD_PORT=6600
+# gmusicproxy url
 PROXY_URL=http://localhost:9999
+# mpd playlist directory
 PLIST_DIR=$HOME/.cache/mpd/playlists
+# playlist prefix
 PLIST_PFX=play
+# auto purge older than this many days
 CACHE_AGE=3
+# auto skip when thumbs down
 AUTO_SKIP=true
 
