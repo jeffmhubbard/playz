@@ -11,6 +11,7 @@ DEFAULT_PFX=playz
 DEFAULT_AGE=10
 DEFAULT_SKIP=true
 
+# return playlist of search results
 function get_search() {
   local action=search
   local cmd=get_by_search
@@ -67,6 +68,7 @@ function get_search() {
   [[ -f $m3ufile ]] && { echo "↓ ${m3ufile:t}"; mpc_auto ${m3ufile:t:r} }
 }
 
+# return playlist of new station
 function get_radio() {
   local action=radio
   local cmd=get_new_station_by_search
@@ -118,6 +120,7 @@ function get_radio() {
   [[ -f $m3ufile ]] && { echo "↓ ${m3ufile:t}"; mpc_auto ${m3ufile:t:r} }
 }
 
+# return playlist of artist top tracks
 function get_top() {
   local action=toptracks
   local cmd=get_top_tracks_artist
@@ -156,6 +159,7 @@ function get_top() {
   [[ -f $m3ufile ]] && { echo "↓ ${m3ufile:t}"; mpc_auto ${m3ufile:t:r} }
 }
 
+# return all playlists in artist discography
 function get_discog() {
   local action=album
   local cmd=get_discography_artist
@@ -195,6 +199,7 @@ function get_discog() {
     done
 }
 
+# return playlist of station from current song
 function get_current() {
   local action=current
   local cmd=get_new_station_by_id
@@ -224,6 +229,7 @@ function get_current() {
   [[ -f $m3ufile ]] && { echo "↓ ${m3ufile:t}"; mpc_auto ${m3ufile:t:r} }
 }
 
+# return playlist of user's collection
 function get_collection() {
   local action=collection
   local cmd=get_collection
@@ -246,6 +252,7 @@ function get_collection() {
   [[ -f $m3ufile ]] && { echo "↓ ${m3ufile:t}"; mpc_auto ${m3ufile:t:r} }
 }
 
+# return I'm Feeling Lucky playlist
 function get_lucky() {
   local action=lucky
   local cmd=get_ifl_station
@@ -271,6 +278,7 @@ function get_lucky() {
   [[ -f $m3ufile ]] && { echo "↓ ${m3ufile:t}"; mpc_auto ${m3ufile:t:r} }
 }
 
+# return playlist of promoted song (thumbs up)
 function get_thumbsup() {
   local action=promoted
   local cmd=get_promoted
@@ -291,6 +299,7 @@ function get_thumbsup() {
   [[ -f $m3ufile ]] && { echo "↓ ${m3ufile:t}"; mpc_auto ${m3ufile:t:r} }
 }
 
+# return all station playlists
 function get_stations() {
   local action=radio
   local cmd=get_all_stations
@@ -319,6 +328,7 @@ function get_stations() {
   done
 }
 
+# return all user playlists
 function get_playlists() {
   local action=playlists
   local cmd=get_all_playlists
@@ -347,6 +357,7 @@ function get_playlists() {
   done
 }
 
+# thumbs up current song
 function thumb_up() {
   local cmd=like_song
   local proxy=${PROXY_URL:-$DEFAULT_URL}
@@ -361,6 +372,7 @@ function thumb_up() {
   echo "Thumbs up!"
 }
 
+# thumbs down current song
 function thumb_down() {
   local cmd=dislike_song
   local proxy=${PROXY_URL:-$DEFAULT_URL}
@@ -376,6 +388,7 @@ function thumb_down() {
   [[ ${AUTO_SKIP:-$DEFAULT_SKIP} == true ]] && { echo "Skipping..."; mpc_next; }
 }
 
+# return artist id
 function _get_artist_id() {
   curl -sG $proxy/search_id \
     --data-urlencode "artist=$@" \
@@ -383,11 +396,13 @@ function _get_artist_id() {
     --data-urlencode "exact=no"
 }
 
+# return play id (track)
 function _get_playid() {
   local -a current=(${(@ws:=:)$(mpc current -f "%file%")})
   echo ${current[2]}
 }
 
+# run mpc commands
 function mpc_auto() {
   local plist=$1
 
@@ -396,16 +411,19 @@ function mpc_auto() {
   [[ $MPC_START ]] && mpc play &>/dev/null
 }
 
+# confirm overwrite
 function do_overwrite() {
   vared -cp "Overwrite existing (y/n)? " ans
   [[ "$ans" =~ ^[Yy]$ ]] && echo true
 }
 
+# confirm delete
 function do_delete() {
   vared -cp "Confirm delete (y/n)? " ans
   [[ "$ans" =~ ^[Yy]$ ]] && echo true
 }
 
+# mpc controls
 function mpc_show() { mpc status }
 function mpc_list() { mpc playlist | less }
 function mpc_playpause() { mpc toggle &>/dev/null }
@@ -413,6 +431,7 @@ function mpc_next() { mpc next &>/dev/null }
 function mpc_prev() { mpc prev &>/dev/null }
 function mpc_stop() { mpc stop &>/dev/null }
 
+# purge playlists
 function purge_cache() {
   local cache=${PLIST_DIR:-$DEFAULT_DIR}
   local prefix=${PLIST_PFX:-$DEFAULT_PFX}
@@ -440,7 +459,10 @@ function purge_cache() {
   fi
 }
 
+# no help message
 function usage() { echo "don't"; exit 1; }
+
+##################################################
 
 for arg in $@
 do
