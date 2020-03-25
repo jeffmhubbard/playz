@@ -18,19 +18,15 @@ DEFAULT_SKIP=true
 function get_search() {
   local action=search
   local cmd=get_by_search
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
-
   local -a query=(${(@ws: - :)REQ_STRING})
+
   if (( $+query ))
   then
-    local -A opts
+    local artist=$query[1]
+
     opts[type]=matches
     opts[exact]=no
     opts[tracks]=20
-
-    local artist=$query[1]
     opts[artist]=$artist
   else
     return 1
@@ -60,6 +56,7 @@ function get_search() {
   local m3ufile=$cache/$prefix-$action-${artist// /_}-${title// /_}.m3u
   [[ $OPT_FORCE != true && -f $m3ufile ]] && \
     { echo "⁈ $m3ufile exists!"; [[ $(do_overwrite) != true ]] && return 1; }
+
   curl -sG $proxy/$cmd \
     --data-urlencode "type=${opts[type]}" \
     --data-urlencode "artist=${opts[artist]}" \
@@ -75,19 +72,15 @@ function get_search() {
 function get_radio() {
   local action=radio
   local cmd=get_new_station_by_search
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
-
   local -a query=(${(@ws: - :)REQ_STRING})
+
   if (( $+query ))
   then
-    local -A opts
+    local artist=$query[1]
+
     opts[type]=artist
     opts[exact]=no
     opts[tracks]=20
-
-    local artist=$query[1]
     opts[artist]=$artist
   else
     return 1
@@ -112,6 +105,7 @@ function get_radio() {
   local m3ufile=$cache/$prefix-$action-${artist// /_}-${title// /_}.m3u
   [[ $OPT_FORCE != true && -f $m3ufile ]] && \
     { echo "⁈ $m3ufile exists!"; [[ $(do_overwrite) != true ]] && return 1; }
+
   curl -sG $proxy/$cmd \
     --data-urlencode "type=${opts[type]}" \
     --data-urlencode "artist=${opts[artist]}" \
@@ -127,17 +121,13 @@ function get_radio() {
 function get_top() {
   local action=toptracks
   local cmd=get_top_tracks_artist
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
-
   local -a query=(${(@ws: - :)REQ_STRING})
+
   if (( $+query ))
   then
     local artist=$query[1]
     local artistid=$(_get_artist_id $artist)
 
-    local -A opts
     opts[id]=$artistid
     opts[type]=artist
     opts[tracks]=20
@@ -153,6 +143,7 @@ function get_top() {
   local m3ufile=$cache/$prefix-$action-${artist// /_}.m3u
   [[ $OPT_FORCE != true && -f $m3ufile ]] && \
     { echo "⁈ $m3ufile exists!"; [[ $(do_overwrite) != true ]] && return 1; }
+
   curl -sG $proxy/$cmd \
     --data-urlencode "type=${opts[type]}" \
     --data-urlencode "id=${opts[id]}" \
@@ -166,17 +157,13 @@ function get_top() {
 function get_discog() {
   local action=album
   local cmd=get_discography_artist
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
-
   local -a query=(${(@ws: - :)REQ_STRING})
+
   if (( $+query ))
   then
     local artist=${query[1]:l}
     local artistid=$(_get_artist_id $artist)
 
-    local -A opts
     opts[id]=$artistid
     opts[format]=text
   else
@@ -193,6 +180,7 @@ function get_discog() {
       local album=${str[1]:l}
       local year=$str[2]
       local url=$str[3]
+
       local m3ufile=$cache/$prefix-$action-${artist// /_}-$year-${album// /_}.m3u
       [[ $OPT_FORCE != true && -f $m3ufile ]] && \
         { echo "⁈ $m3ufile exists!"; [[ $(do_overwrite) != true ]] && return 1; }
@@ -206,11 +194,7 @@ function get_discog() {
 function get_current() {
   local action=current
   local cmd=get_new_station_by_id
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
 
-  local -A opts
   opts[id]=$(_get_playid)
   opts[type]=song
   opts[tracks]=20
@@ -223,6 +207,7 @@ function get_current() {
   local m3ufile=$cache/$prefix-$action.m3u
   [[ $OPT_FORCE != true && -f $m3ufile ]] && \
     { echo "⁈ $m3ufile exists!"; [[ $(do_overwrite) != true ]] && return 1; }
+
   curl -sG $proxy/$cmd \
     --data-urlencode "id=${opts[id]}" \
     --data-urlencode "type=${opts[type]}" \
@@ -236,17 +221,14 @@ function get_current() {
 function get_collection() {
   local action=collection
   local cmd=get_collection
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
 
-  local -A opts
   opts[shuffle]=yes
   opts[rating]=2
 
   local m3ufile=$cache/$prefix-$action.m3u
   [[ $OPT_FORCE != true && -f $m3ufile ]] && \
     { echo "⁈ $m3ufile exists!"; [[ $(do_overwrite) != true ]] && return 1; }
+
   curl -sG $proxy/$cmd \
     --data-urlencode "shuffle=${opts[shuffle]}" \
     --data-urlencode "rating=${opts[rating]}" \
@@ -259,11 +241,7 @@ function get_collection() {
 function get_lucky() {
   local action=lucky
   local cmd=get_ifl_station
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
 
-  local -A opts
   opts[tracks]=20
 
   if [[ -n $OPT_TRACKS ]]
@@ -274,6 +252,7 @@ function get_lucky() {
   local m3ufile=$cache/$prefix-$action.m3u
   [[ $OPT_FORCE != true && -f $m3ufile ]] && \
     { echo "⁈ $m3ufile exists!"; [[ $(do_overwrite) != true ]] && return 1; }
+
   curl -sG $proxy/$cmd \
     --data-urlencode "num_tracks=${opts[tracks]}" \
     -o ${m3ufile}
@@ -285,16 +264,13 @@ function get_lucky() {
 function get_thumbsup() {
   local action=promoted
   local cmd=get_promoted
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
 
-  local -A opts
   opts[shuffle]=yes
 
   local m3ufile=$cache/$prefix-$action.m3u
   [[ $OPT_FORCE != true && -f $m3ufile ]] && \
     { echo "⁈ $m3ufile exists!"; [[ $(do_overwrite) != true ]] && return 1; }
+
   curl -sG $proxy/$cmd \
     --data-urlencode "shuffle=${opts[shuffle]}" \
     -o ${m3ufile}
@@ -307,11 +283,6 @@ function get_stations() {
   local action=radio
   local cmd=get_all_stations
 
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
-
-  local -A opts
   opts[format]=text
 
   IFS=$'\n' output=($(curl -sG $proxy/$cmd \
@@ -322,6 +293,7 @@ function get_stations() {
     local -a str=(${(@ws:|:)line})
     local station=${str[1]:l}
     local url=$str[2]
+
     local m3ufile=$cache/$prefix-$action-${station// /_}.m3u
     [[ $OPT_FORCE != true && -f $m3ufile ]] && \
       { echo "⁈ $m3ufile exists!"; [[ $(do_overwrite) != true ]] && return 1; }
@@ -336,11 +308,6 @@ function get_playlists() {
   local action=playlists
   local cmd=get_all_playlists
 
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
-
-  local -A opts
   opts[format]=text
 
   IFS=$'\n' output=($(curl -sG $proxy/$cmd \
@@ -351,6 +318,7 @@ function get_playlists() {
     local -a str=(${(@ws:|:)line})
     local station=${str[1]:l}
     local url=$str[2]
+
     local m3ufile=$cache/$prefix-$action-${station// /_}.m3u
     [[ $OPT_FORCE != true && -f $m3ufile ]] && \
       { echo "⁈ $m3ufile exists!"; [[ $(do_overwrite) != true ]] && return 1; }
@@ -363,11 +331,7 @@ function get_playlists() {
 # thumbs up current song
 function thumb_up() {
   local cmd=like_song
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
 
-  local -A opts
   opts[id]=$(_get_playid)
 
   curl -sfG $proxy/$cmd \
@@ -378,16 +342,13 @@ function thumb_up() {
 # thumbs down current song
 function thumb_down() {
   local cmd=dislike_song
-  local proxy=${PROXY_URL:-$DEFAULT_URL}
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
 
-  local -A opts
   opts[id]=$(_get_playid)
 
   curl -sfG $proxy/$cmd \
     --data-urlencode "id=${opts[id]}"
   echo "Thumbs down!"
+
   [[ ${AUTO_SKIP:-$DEFAULT_SKIP} == true ]] && { echo "Skipping..."; mpc_next; }
 }
 
@@ -436,8 +397,6 @@ function mpc_stop() { mpc stop &>/dev/null }
 
 # purge playlists
 function purge_cache() {
-  local cache=${PLIST_DIR:-$DEFAULT_DIR}
-  local prefix=${PLIST_PFX:-$DEFAULT_PFX}
   local match=${PURGE_TYPE:l}
   local -a actions=(search radio album playlist promoted current lucky)
   local pattern
@@ -462,7 +421,7 @@ function purge_cache() {
 
 # help message
 function usage() {
-  echo "$APPNAME ($APPVER)"
+  echo "▶ $APPNAME ($APPVER)"
   echo " fetch playlists from gmusicproxy"
   echo
   echo "Usage:"
@@ -554,6 +513,11 @@ done
 
 [[ -f $DEFAULT_CONF ]] && source $DEFAULT_CONF
 [[ ! -d $PLIST_DIR ]] && mkdir -p $PLIST_DIR 2>/dev/null
+
+typeset -g proxy=${PROXY_URL:-$DEFAULT_URL}
+typeset -g cache=${PLIST_DIR:-$DEFAULT_DIR}
+typeset -g prefix=${PLIST_PFX:-$DEFAULT_PFX}
+typeset -Ag opts
 
 $RUN_CMD
 
