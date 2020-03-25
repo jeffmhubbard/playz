@@ -15,6 +15,7 @@ DEFAULT_URL=http://localhost:9999
 DEFAULT_DIR=$HOME/.config/mpd/playlists
 DEFAULT_PFX=playz
 DEFAULT_AGE=10
+DEFAULT_SKIP=true
 
 [[ ! -d $PLIST_DIR ]] && mkdir $PLIST_DIR 2>/dev/null
 
@@ -61,6 +62,8 @@ function get_search() {
   fi
 
   local m3ufile=$cache/$prefix-$action-${artist// /_}-${title// /_}.m3u
+  [[ $OPT_FORCE != true && -f $m3ufile ]] && \
+    { [[ $(do_overwrite) != true ]] && return 1; }
   curl -sG $proxy/$cmd \
     --data-urlencode "type=${opts[type]}" \
     --data-urlencode "artist=${opts[artist]}" \
@@ -110,6 +113,8 @@ function get_radio() {
   fi
 
   local m3ufile=$cache/$prefix-$action-${artist// /_}-${title// /_}.m3u
+  [[ $OPT_FORCE != true && -f $m3ufile ]] && \
+    { [[ $(do_overwrite) != true ]] && return 1; }
   curl -sG $proxy/$cmd \
     --data-urlencode "type=${opts[type]}" \
     --data-urlencode "artist=${opts[artist]}" \
@@ -148,6 +153,8 @@ function get_top() {
   fi
 
   local m3ufile=$cache/$prefix-$action-${artist// /_}.m3u
+  [[ $OPT_FORCE != true && -f $m3ufile ]] && \
+    { [[ $(do_overwrite) != true ]] && return 1; }
   curl -sG $proxy/$cmd \
     --data-urlencode "type=${opts[type]}" \
     --data-urlencode "id=${opts[id]}" \
@@ -188,6 +195,8 @@ function get_discog() {
       local year=$str[2]
       local url=$str[3]
       local m3ufile=$cache/$prefix-$action-${artist// /_}-$year-${album// /_}.m3u
+      [[ $OPT_FORCE != true && -f $m3ufile ]] && \
+        { [[ $(do_overwrite) != true ]] && return 1; }
 
       curl $url -so ${m3ufile}
       [[ -f $m3ufile ]] && echo "↓ ${m3ufile:t}"
@@ -212,6 +221,8 @@ function get_current() {
   fi
 
   local m3ufile=$cache/$prefix-$action.m3u
+  [[ $OPT_FORCE != true && -f $m3ufile ]] && \
+    { [[ $(do_overwrite) != true ]] && return 1; }
   curl -sG $proxy/$cmd \
     --data-urlencode "id=${opts[id]}" \
     --data-urlencode "type=${opts[type]}" \
@@ -233,6 +244,8 @@ function get_collection() {
   opts[rating]=2
 
   local m3ufile=$cache/$prefix-$action.m3u
+  [[ $OPT_FORCE != true && -f $m3ufile ]] && \
+    { [[ $(do_overwrite) != true ]] && return 1; }
   curl -sG $proxy/$cmd \
     --data-urlencode "shuffle=${opts[shuffle]}" \
     --data-urlencode "rating=${opts[rating]}" \
@@ -257,6 +270,8 @@ function get_lucky() {
   fi
 
   local m3ufile=$cache/$prefix-$action.m3u
+  [[ $OPT_FORCE != true && -f $m3ufile ]] && \
+    { [[ $(do_overwrite) != true ]] && return 1; }
   curl -sG $proxy/$cmd \
     --data-urlencode "num_tracks=${opts[tracks]}" \
     -o ${m3ufile}
@@ -275,6 +290,8 @@ function get_thumbsup() {
   opts[shuffle]=yes
 
   local m3ufile=$cache/$prefix-$action.m3u
+  [[ $OPT_FORCE != true && -f $m3ufile ]] && \
+    { [[ $(do_overwrite) != true ]] && return 1; }
   curl -sG $proxy/$cmd \
     --data-urlencode "shuffle=${opts[shuffle]}" \
     -o ${m3ufile}
@@ -302,6 +319,8 @@ function get_stations() {
     local station=${str[1]:l}
     local url=$str[2]
     local m3ufile=$cache/$prefix-$action-${station// /_}.m3u
+    [[ $OPT_FORCE != true && -f $m3ufile ]] && \
+      { [[ $(do_overwrite) != true ]] && return 1; }
 
     curl $url -so ${m3ufile}
     [[ -f $m3ufile ]] && echo "↓ ${m3ufile:t}"
@@ -328,6 +347,8 @@ function get_playlists() {
     local station=${str[1]:l}
     local url=$str[2]
     local m3ufile=$cache/$prefix-$action-${station// /_}.m3u
+    [[ $OPT_FORCE != true && -f $m3ufile ]] && \
+      { [[ $(do_overwrite) != true ]] && return 1; }
 
     curl $url -so ${m3ufile}
     [[ -f $m3ufile ]] && echo "↓ ${m3ufile:t}"
@@ -364,7 +385,7 @@ function thumb_down() {
   curl -sfG $proxy/$cmd \
     --data-urlencode "id=${opts[id]}"
   echo "Thumbs down!"
-  [[ $AUTO_SKIP == true ]] && { echo "Skipping..."; mpc next; }
+  [[ ${AUTO_SKIP:-$DEFAULT_SKIP} == true ]] && { echo "Skipping..."; mpc_next; }
 }
 
 function _get_artist_id() {
@@ -387,6 +408,16 @@ function mpc_auto() {
   [[ $MPC_START ]] && mpc play &>/dev/null
 }
 
+function do_overwrite() {
+  vared -cp "Overwrite existing (y/n)? " ans
+  [[ "$ans" =~ ^[Yy]$ ]] && echo true
+}
+
+function mpc_playpause() { mpc toggle &>/dev/null }
+function mpc_next() { mpc next &>/dev/null }
+function mpc_prev() { mpc prev &>/dev/null }
+function mpc_stop() { mpc stop &>/dev/null }
+
 function usage() { echo "don't"; exit 1; }
 
 for arg in $@
@@ -407,14 +438,18 @@ do
 #    -La | --listen-album) REQ_TYPE=get_albums; shift;;
     -Tu | --thumb-up) REQ_TYPE=thumb_up; shift;;
     -Td | --thumb-down) REQ_TYPE=thumb_down; shift;;
+    -Mt | --mpc-toggle) REQ_TYPE=mpc_playpause; shift;;
+    -Mn | --mpc-next) REQ_TYPE=mpc_next; shift;;
+    -Mp | --mpc-prev) REQ_TYPE=mpc_prev; shift;;
+    -Ms | --mpc-stop) REQ_TYPE=mpc_stop; shift;;
     -t | --tracks) OPT_TRACKS=$2; shift 2;;
     -e | --exact) OPT_EXACT=true; shift;;
     -a | --album) OPT_ALBUM=true; shift;;
-    -f | --force) MPC_FORCE=true; shift;;
+    -f | --force) OPT_FORCE=true; shift;;
     -c | --clear) MPC_CLEAR=true; shift;;
     -l | --load) MPC_LOAD=true; shift;;
     -s | --start) MPC_START=true; shift;;
-    -A | --auto) MPC_FORCE=true; MPC_CLEAR=true; MPC_LOAD=true; MPC_START=true; shift;;
+    -A | --auto) OPT_FORCE=true; MPC_CLEAR=true; MPC_LOAD=true; MPC_START=true; shift;;
     -h | --help) usage;;
   esac
 done
