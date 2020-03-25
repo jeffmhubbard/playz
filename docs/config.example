@@ -1,0 +1,10 @@
+# playz conf
+
+MPD_HOST=127.0.0.1
+MPD_PORT=6600
+PROXY_URL=http://localhost:9999
+PLIST_DIR=$HOME/.cache/mpd/playlists
+PLIST_PFX=play
+CACHE_AGE=3
+AUTO_SKIP=true
+

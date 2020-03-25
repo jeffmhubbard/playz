@@ -1,14 +1,8 @@
 #!/usr/bin/env zsh
 
+# playz - fetch playlists from gmusicproxy
 
-MPD_HOST=127.0.0.1
-MPD_PORT=6600
-PROXY_URL=http://localhost:9999
-PLIST_DIR=$HOME/.cache/mpd/playlists
-PLIST_PFX=play
-CACHE_AGE=3
-AUTO_SKIP=true
-
+DEFAULT_CONF=$HOME/.config/playz/config
 DEFAULT_HOST=0.0.0.0
 DEFAULT_PORT=6600
 DEFAULT_URL=http://localhost:9999
@@ -16,8 +10,6 @@ DEFAULT_DIR=$HOME/.config/mpd/playlists
 DEFAULT_PFX=playz
 DEFAULT_AGE=10
 DEFAULT_SKIP=true
-
-[[ ! -d $PLIST_DIR ]] && mkdir $PLIST_DIR 2>/dev/null
 
 function get_search() {
   local action=search
@@ -453,6 +445,9 @@ do
     -h | --help) usage;;
   esac
 done
+
+[[ -f $DEFAULT_CONF ]] && source $DEFAULT_CONF
+[[ ! -d $PLIST_DIR ]] && mkdir -p $PLIST_DIR 2>/dev/null
 
 $REQ_TYPE
 
